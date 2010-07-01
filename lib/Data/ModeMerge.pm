@@ -224,7 +224,7 @@ is equivalent to:
 
 and will merge to become:
 
- {b=>3}
+ {h=>{b=>3}}
 
 =head2 DELETE ('!' prefix on the right side)
 
