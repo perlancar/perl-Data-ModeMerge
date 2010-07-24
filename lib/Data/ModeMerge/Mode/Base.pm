@@ -13,7 +13,7 @@ This is the base class for mode type handlers.
 
 use Any::Moose;
 #use Storable; # qw/dclone/;
-use Clone; # qw/clone/;
+use Clone::Any qw/clone/;
 
 =head1 ATTRIBUTES
 
@@ -454,7 +454,7 @@ sub merge_HASH_HASH {
         last unless keys %$res;
         #print "DEBUG: cloning config ...\n";
         #my $c2 = Storable::dclone($c);
-        my $c2 = Clone::clone($c);
+        my $c2 = clone($c);
         for (keys %$res) {
             if ($c->allow_override) {
                 my $re = $c->allow_override;
