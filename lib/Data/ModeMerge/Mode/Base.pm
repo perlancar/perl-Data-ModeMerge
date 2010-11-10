@@ -11,6 +11,7 @@ This is the base class for mode type handlers.
 
 =cut
 
+use 5.010;
 use Any::Moose;
 #use Storable; # qw/dclone/;
 use Clone::Any qw/clone/;

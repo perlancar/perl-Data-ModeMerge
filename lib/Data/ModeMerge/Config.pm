@@ -15,7 +15,7 @@ Configuration variables for Data::ModeMerge.
 
 =cut
 
-use feature 'state';
+use 5.010;
 use Any::Moose;
 
 =head1 ATTRIBUTES

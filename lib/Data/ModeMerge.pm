@@ -265,6 +265,7 @@ Precedence levels (from highest to lowest):
 
 =cut
 
+use 5.010;
 use Any::Moose;
 use Data::ModeMerge::Config;
 use Data::Dumper;

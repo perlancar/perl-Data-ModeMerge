@@ -11,6 +11,7 @@ This is the class to handle ADD merge mode.
 
 =cut
 
+use 5.010;
 use Any::Moose;
 extends 'Data::ModeMerge::Mode::NORMAL';
 
