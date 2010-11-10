@@ -769,8 +769,6 @@ keys from being overriden. I found these two features lacking in all
 merging modules that I've evaluated prior to writing Data::ModeMerge.
 
 
-=back
-
 =head1 SEE ALSO
 
 L<Data::ModeMerge::Config>
