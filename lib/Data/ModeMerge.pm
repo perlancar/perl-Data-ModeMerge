@@ -316,6 +316,8 @@ has cur_mem_key => (is => "rw"); # for handling circular refs. instead of passin
 
 For typical usage, you only need merge().
 
+=for Pod::Coverage ^BUILD$
+
 =cut
 
 sub _dump {

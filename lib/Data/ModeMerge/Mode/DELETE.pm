@@ -9,6 +9,8 @@ package Data::ModeMerge::Mode::DELETE;
 
 This is the class to handle DELETE merge mode.
 
+=for Pod::Coverage ^merge_.*
+
 =cut
 
 use 5.010;

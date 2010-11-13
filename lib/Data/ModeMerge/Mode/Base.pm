@@ -9,6 +9,8 @@ package Data::ModeMerge::Mode::Base;
 
 This is the base class for mode type handlers.
 
+=for Pod::Coverage ^merge_.*
+
 =cut
 
 use 5.010;

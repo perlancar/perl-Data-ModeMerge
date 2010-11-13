@@ -9,6 +9,8 @@ package Data::ModeMerge::Mode::ADD;
 
 This is the class to handle ADD merge mode.
 
+=for Pod::Coverage ^merge_.*
+
 =cut
 
 use 5.010;

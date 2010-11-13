@@ -9,6 +9,8 @@ package Data::ModeMerge::Mode::NORMAL;
 
 This is the class to handle NORMAL merge mode.
 
+=for Pod::Coverage ^merge_.*
+
 =cut
 
 use 5.010;

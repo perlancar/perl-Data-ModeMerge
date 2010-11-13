@@ -9,6 +9,8 @@ package Data::ModeMerge::Mode::SUBTRACT;
 
 This is the class to handle SUBTRACT merge mode.
 
+=for Pod::Coverage ^merge_.*
+
 =cut
 
 use 5.010;

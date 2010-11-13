@@ -9,6 +9,8 @@ package Data::ModeMerge::Mode::KEEP;
 
 This is the class to handle KEEP merge mode.
 
+=for Pod::Coverage ^merge_.*
+
 =cut
 
 use 5.010;

@@ -9,6 +9,8 @@ package Data::ModeMerge::Mode::CONCAT;
 
 This is the class to handle CONCAT merge mode.
 
+=for Pod::Coverage ^merge_.*
+
 =cut
 
 use 5.010;
