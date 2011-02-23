@@ -16,7 +16,10 @@ Configuration variables for Data::ModeMerge.
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
+use Moo;
 
 =head1 ATTRIBUTES
 
@@ -39,7 +42,7 @@ Example:
 
 =cut
 
-has recurse_hash => (is => 'rw', default => 1);
+has recurse_hash => (is => 'rw', default => sub{1});
 
 =head2 recurse_array => BOOL
 
@@ -58,7 +61,7 @@ Example:
 
 =cut
 
-has recurse_array => (is => 'rw', default => 0);
+has recurse_array => (is => 'rw', default => sub{0});
 
 =head2 parse_prefix => BOOL
 
@@ -74,7 +77,7 @@ behaviour is similar to most other nested merge modules.
 
 =cut
 
-has parse_prefix => (is => 'rw', default => 1);
+has parse_prefix => (is => 'rw', default => sub{1});
 
 =head2 wanted_path => ARRAYREF
 
@@ -143,7 +146,7 @@ Example:
 
 =cut
 
-has default_mode => (is => 'rw', default => 'NORMAL');
+has default_mode => (is => 'rw', default => sub{'NORMAL'});
 
 =head2 disable_modes => ARRAYREF
 
@@ -184,7 +187,7 @@ Example:
 
 =cut
 
-has allow_create_array => (is => 'rw', default => 1);
+has allow_create_array => (is => 'rw', default => sub{1});
 
 =head2 allow_create_hash => BOOL
 
@@ -203,7 +206,7 @@ Example:
 
 =cut
 
-has allow_create_hash => (is => 'rw', default => 1);
+has allow_create_hash => (is => 'rw', default => sub{1});
 
 =head2 allow_destroy_array => BOOL
 
@@ -223,7 +226,7 @@ Example:
 
 =cut
 
-has allow_destroy_array => (is => 'rw', default => 1);
+has allow_destroy_array => (is => 'rw', default => sub{1});
 
 =head2 allow_destroy_hash => BOOL
 
@@ -243,7 +246,7 @@ Example:
 
 =cut
 
-has allow_destroy_hash => (is => 'rw', default => 1);
+has allow_destroy_hash => (is => 'rw', default => sub{1});
 
 =head2 exclude_parse => ARRAYREF
 
@@ -413,7 +416,7 @@ their stickiness.
 
 =cut
 
-has readd_prefix => (is => 'rw', default => 1);
+has readd_prefix => (is => 'rw', default => sub{1});
 
 =head2 premerge_pair_filter => CODEREF
 
@@ -469,7 +472,7 @@ key.
 
 =cut
 
-has options_key => (is => 'rw', default => '');
+has options_key => (is => 'rw', default => sub{''});
 
 =head2 allow_override => REGEX
 
@@ -548,6 +551,4 @@ sub _config_ok {
                   /];
 }
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;

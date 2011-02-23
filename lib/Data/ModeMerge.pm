@@ -266,9 +266,13 @@ Precedence levels (from highest to lowest):
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
 use Data::ModeMerge::Config;
 use Data::Dumper;
+use Moo;
+
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(mode_merge);
@@ -783,6 +787,4 @@ use Data::ModeMerge)
 
 =cut
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;

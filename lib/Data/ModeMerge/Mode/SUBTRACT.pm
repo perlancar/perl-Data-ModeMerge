@@ -14,7 +14,10 @@ This is the class to handle SUBTRACT merge mode.
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
+use Moo;
 extends 'Data::ModeMerge::Mode::NORMAL';
 
 sub name { 'SUBTRACT' }
@@ -94,6 +97,4 @@ sub merge_HASH_HASH {
     $mm->_merge($key, $l, $r2, 'NORMAL');
 }
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;

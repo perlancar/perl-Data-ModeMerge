@@ -14,7 +14,10 @@ This is the class to handle NORMAL merge mode.
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
+use Moo;
 extends 'Data::ModeMerge::Mode::Base';
 
 sub name { 'NORMAL' }
@@ -95,6 +98,4 @@ sub merge_CODE_CODE {
     ($key, $r);
 }
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;

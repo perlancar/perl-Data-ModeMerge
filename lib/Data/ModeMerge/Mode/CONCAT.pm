@@ -14,7 +14,10 @@ This is the class to handle CONCAT merge mode.
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
+use Moo;
 extends 'Data::ModeMerge::Mode::ADD';
 
 sub name { 'CONCAT' }
@@ -30,6 +33,4 @@ sub merge_SCALAR_SCALAR {
     ($key, ($l // "") . $r);
 }
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;

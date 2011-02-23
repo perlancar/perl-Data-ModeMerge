@@ -14,7 +14,10 @@ This is the class to handle DELETE merge mode.
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
+use Moo;
 extends 'Data::ModeMerge::Mode::Base';
 
 sub name { 'DELETE' }
@@ -81,6 +84,4 @@ sub merge_HASH_HASH {
     return;
 }
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;

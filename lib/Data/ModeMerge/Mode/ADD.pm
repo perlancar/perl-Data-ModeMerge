@@ -14,7 +14,10 @@ This is the class to handle ADD merge mode.
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
+use Moo;
 extends 'Data::ModeMerge::Mode::NORMAL';
 
 sub name { 'ADD' }
@@ -71,6 +74,4 @@ sub merge_HASH_ARRAY {
     return;
 }
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;

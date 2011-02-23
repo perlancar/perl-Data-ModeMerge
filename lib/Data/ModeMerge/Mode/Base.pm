@@ -14,9 +14,12 @@ This is the base class for mode type handlers.
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
 #use Storable; # qw/dclone/;
 use Clone::Any qw/clone/;
+use Moo;
 
 =head1 ATTRIBUTES
 
@@ -619,6 +622,4 @@ sub merge_HASH_HASH {
     ($key, $res, $backup);
 }
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;

@@ -14,7 +14,10 @@ This is the class to handle KEEP merge mode.
 =cut
 
 use 5.010;
-use Any::Moose;
+use strict;
+use warnings;
+
+use Moo;
 extends 'Data::ModeMerge::Mode::Base';
 
 sub name { 'KEEP' }
@@ -45,9 +48,9 @@ sub merge_ARRAY_SCALAR {
     ($key, $l);
 }
 
-override merge_ARRAY_ARRAY => sub {
+sub merge_ARRAY_ARRAY {
     my ($self, $key, $l, $r) = @_;
-    super($key, $l, $r, 'KEEP');
+    $self->SUPER::merge_ARRAY_ARRAY($key, $l, $r, 'KEEP');
 };
 
 sub merge_ARRAY_HASH {
@@ -65,11 +68,9 @@ sub merge_HASH_ARRAY {
     ($key, $l);
 }
 
-override merge_HASH_HASH => sub {
+sub merge_HASH_HASH {
     my ($self, $key, $l, $r) = @_;
-    super($l, $r, 'KEEP');
+    $self->SUPER::merge_HASH_HASH($key, $l, $r, 'KEEP');
 };
 
-__PACKAGE__->meta->make_immutable;
-no Any::Moose;
 1;
