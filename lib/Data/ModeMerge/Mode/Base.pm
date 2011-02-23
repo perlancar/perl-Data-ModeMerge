@@ -34,6 +34,8 @@ has remove_prefix_sub => (is => 'rw');
 
 =head1 METHODS
 
+=for Pod::Coverage BUILD
+
 =cut
 
 =head2 name
