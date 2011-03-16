@@ -18,7 +18,7 @@ use strict;
 use warnings;
 
 #use Storable; # qw/dclone/;
-use Clone::Any qw/clone/;
+use Data::Clone qw/clone/;
 use Moo;
 
 =head1 ATTRIBUTES
