@@ -1,24 +1,10 @@
 package Data::ModeMerge::Mode::ADD;
-# ABSTRACT: Handler for Data::ModeMerge ADD merge mode
-
-=head1 SYNOPSIS
-
-    use Data::ModeMerge;
-
-=head1 DESCRIPTION
-
-This is the class to handle ADD merge mode.
-
-=for Pod::Coverage ^merge_.*
-
-=cut
 
 use 5.010;
-use strict;
-use warnings;
-
 use Moo;
 extends 'Data::ModeMerge::Mode::NORMAL';
+
+# VERSION
 
 sub name { 'ADD' }
 
@@ -75,3 +61,16 @@ sub merge_HASH_ARRAY {
 }
 
 1;
+# ABSTRACT: Handler for Data::ModeMerge ADD merge mode
+
+=head1 SYNOPSIS
+
+ use Data::ModeMerge;
+
+=head1 DESCRIPTION
+
+This is the class to handle ADD merge mode.
+
+=for Pod::Coverage ^merge_.*
+
+=cut

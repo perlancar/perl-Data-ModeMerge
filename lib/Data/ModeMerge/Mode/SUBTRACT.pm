@@ -1,24 +1,10 @@
 package Data::ModeMerge::Mode::SUBTRACT;
-# ABSTRACT: Handler for Data::ModeMerge SUBTRACT merge mode
-
-=head1 SYNOPSIS
-
-    use Data::ModeMerge;
-
-=head1 DESCRIPTION
-
-This is the class to handle SUBTRACT merge mode.
-
-=for Pod::Coverage ^merge_.*
-
-=cut
 
 use 5.010;
-use strict;
-use warnings;
-
 use Moo;
 extends 'Data::ModeMerge::Mode::NORMAL';
+
+# VERSION
 
 sub name { 'SUBTRACT' }
 
@@ -98,3 +84,15 @@ sub merge_HASH_HASH {
 }
 
 1;
+# ABSTRACT: Handler for Data::ModeMerge SUBTRACT merge mode
+
+=head1 SYNOPSIS
+
+ use Data::ModeMerge;
+
+=head1 DESCRIPTION
+
+This is the class to handle SUBTRACT merge mode.
+
+=for Pod::Coverage ^merge_.*
+

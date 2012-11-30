@@ -1,24 +1,10 @@
 package Data::ModeMerge::Mode::NORMAL;
-# ABSTRACT: Handler for Data::ModeMerge NORMAL merge mode
-
-=head1 SYNOPSIS
-
-    use Data::ModeMerge;
-
-=head1 DESCRIPTION
-
-This is the class to handle NORMAL merge mode.
-
-=for Pod::Coverage ^merge_.*
-
-=cut
 
 use 5.010;
-use strict;
-use warnings;
-
 use Moo;
 extends 'Data::ModeMerge::Mode::Base';
+
+# VERSION
 
 sub name { 'NORMAL' }
 
@@ -99,3 +85,15 @@ sub merge_CODE_CODE {
 }
 
 1;
+# ABSTRACT: Handler for Data::ModeMerge NORMAL merge mode
+
+=head1 SYNOPSIS
+
+ use Data::ModeMerge;
+
+=head1 DESCRIPTION
+
+This is the class to handle NORMAL merge mode.
+
+=for Pod::Coverage ^merge_.*
+

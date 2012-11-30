@@ -1,25 +1,88 @@
 package Data::ModeMerge::Config;
+
+use 5.010;
+use Moo;
+
+# VERSION
+
+has recurse_hash          => (is => 'rw', default => sub{1});
+has recurse_array         => (is => 'rw', default => sub{0});
+has parse_prefix          => (is => 'rw', default => sub{1});
+has wanted_path           => (is => 'rw');
+has default_mode          => (is => 'rw', default => sub{'NORMAL'});
+has disable_modes         => (is => 'rw');
+has allow_create_array    => (is => 'rw', default => sub{1});
+has allow_create_hash     => (is => 'rw', default => sub{1});
+has allow_destroy_array   => (is => 'rw', default => sub{1});
+has allow_destroy_hash    => (is => 'rw', default => sub{1});
+has exclude_parse         => (is => 'rw');
+has exclude_parse_regex   => (is => 'rw');
+has include_parse         => (is => 'rw');
+has include_parse_regex   => (is => 'rw');
+has exclude_merge         => (is => 'rw');
+has exclude_merge_regex   => (is => 'rw');
+has include_merge         => (is => 'rw');
+has include_merge_regex   => (is => 'rw');
+has set_prefix            => (is => 'rw');
+has readd_prefix          => (is => 'rw', default => sub{1});
+has premerge_pair_filter  => (is => 'rw');
+has options_key           => (is => 'rw', default => sub{''});
+has allow_override        => (is => 'rw');
+has disallow_override     => (is => 'rw');
+
+# list of config settings only available in merger-object's config
+# (not in options key)
+sub _config_config {
+    state $a = [qw/
+        wanted_path
+        options_key
+        allow_override
+        disallow_override
+                  /];
+}
+
+# list of config settings available in options key
+sub _config_ok {
+    state $a = [qw/
+        recurse_hash
+        recurse_array
+        parse_prefix
+        default_mode
+        disable_modes
+        allow_create_array
+        allow_create_hash
+        allow_destroy_array
+        allow_destroy_hash
+        exclude_parse
+        exclude_parse_regex
+        include_parse
+        include_parse_regex
+        exclude_merge
+        exclude_merge_regex
+        include_merge
+        include_merge_regex
+        set_prefix
+        readd_prefix
+        premerge_pair_filter
+                  /];
+}
+
+1;
 # ABSTRACT: Data::ModeMerge configuration
 
 =head1 SYNOPSIS
 
-    # getting configuration
-    if ($mm->config->allow_extra_hash_keys) { ... }
+ # getting configuration
+ if ($mm->config->allow_extra_hash_keys) { ... }
 
-    # setting configuration
-    $mm->config->max_warnings(100);
+ # setting configuration
+ $mm->config->max_warnings(100);
+
 
 =head1 DESCRIPTION
 
 Configuration variables for Data::ModeMerge.
 
-=cut
-
-use 5.010;
-use strict;
-use warnings;
-
-use Moo;
 
 =head1 ATTRIBUTES
 
@@ -40,10 +103,6 @@ Example:
  mode_merge({h=>{a=>1}}, {h=>{b=>1}}                   ); # {h=>{a=>1, b=>1}}
  mode_merge({h=>{a=>1}}, {h=>{b=>1}}, {recurse_hash=>0}); # {h=>{b=>1}}
 
-=cut
-
-has recurse_hash => (is => 'rw', default => sub{1});
-
 =head2 recurse_array => BOOL
 
 Context: config, options key
@@ -59,10 +118,6 @@ Example:
  mode_merge([1, 1], [4]                    ); # [4, 1]
  mode_merge([1, 1], [4], {recurse_array=>0}); # [2]
 
-=cut
-
-has recurse_array => (is => 'rw', default => sub{0});
-
 =head2 parse_prefix => BOOL
 
 Context: config, options key
@@ -74,10 +129,6 @@ behaviour is similar to most other nested merge modules.
 
  mode_merge({a=>1}, {"+a"=>2}                   ); # {a=>3}
  mode_merge({a=>1}, {"+a"=>2}, {parse_prefix=>0}); # {a=>1, "+a"=>2}
-
-=cut
-
-has parse_prefix => (is => 'rw', default => sub{1});
 
 =head2 wanted_path => ARRAYREF
 
@@ -129,10 +180,6 @@ would be:
     }
    }
 
-=cut
-
-has wanted_path => (is => 'rw');
-
 =head2 default_mode => 'NORMAL' | 'ADD' | 'CONCAT' | 'SUBTRACT' | 'DELETE' | 'KEEP' | ...
 
 Context: config, options key
@@ -143,10 +190,6 @@ Example:
 
  mode_merge(3, 4                         ); # 4
  mode_merge(3, 4, {default_mode => "ADD"}); # 7
-
-=cut
-
-has default_mode => (is => 'rw', default => sub{'NORMAL'});
 
 =head2 disable_modes => ARRAYREF
 
@@ -166,10 +209,6 @@ Example:
 See also: C<parse_prefix> which if set to 0 will in effect disable all
 modes except the default mode.
 
-=cut
-
-has disable_modes => (is => 'rw');
-
 =head2 allow_create_array => BOOL
 
 Context: config, options key
@@ -185,10 +224,6 @@ Example:
  mode_merge(1, [1,2]                         ); # success, result=[1,2]
  mode_merge(1, [1,2], {allow_create_array=>0}); # failed, can't create array
 
-=cut
-
-has allow_create_array => (is => 'rw', default => sub{1});
-
 =head2 allow_create_hash => BOOL
 
 Context: config, options key
@@ -203,10 +238,6 @@ Example:
 
  mode_merge(1, {a=>1}                        ); # success, result={a=>1}
  mode_merge(1, {a=>1}, {allow_create_hash=>0}); # failed, can't create hash
-
-=cut
-
-has allow_create_hash => (is => 'rw', default => sub{1});
 
 =head2 allow_destroy_array => BOOL
 
@@ -224,10 +255,6 @@ Example:
  mode_merge([1,2], {}                          ); # success, result={}
  mode_merge([1,2], {}, {allow_destroy_array=>0}); # failed, can't destroy array
 
-=cut
-
-has allow_destroy_array => (is => 'rw', default => sub{1});
-
 =head2 allow_destroy_hash => BOOL
 
 Context: config, options key
@@ -243,10 +270,6 @@ Example:
 
  mode_merge({a=>1}, []                         ); # success, result=[]
  mode_merge({a=>1}, [], {allow_destroy_hash=>0}); # failed, can't destroy hash
-
-=cut
-
-has allow_destroy_hash => (is => 'rw', default => sub{1});
 
 =head2 exclude_parse => ARRAYREF
 
@@ -265,10 +288,6 @@ Example:
 
  mode_merge({a=>1, b=>2}, {"+a"=>3, "+b"=>4}, {exclude_parse=>["+b"]}); # {a=>4, b=>2, "+b"=>4}
 
-=cut
-
-has exclude_parse => (is => 'rw');
-
 =head2 exclude_parse_regex => REGEX
 
 Context: config, options key
@@ -276,10 +295,6 @@ Context: config, options key
 Default: undef
 
 Just like C<exclude_parse> but using regex instead of list.
-
-=cut
-
-has exclude_parse_regex => (is => 'rw');
 
 =head2 include_parse => ARRAYREF
 
@@ -300,10 +315,6 @@ Example:
  mode_merge({a=>1, b=>2, c=>3}, {"+a"=>4, "+b"=>5, "+c"=>6},
             {include_parse=>["+a"]}); # {a=>1, "+a"=>4, b=>7, c=>3, "+c"=>6}
 
-=cut
-
-has include_parse => (is => 'rw');
-
 =head2 include_parse_regex => REGEX
 
 Context: config, options key
@@ -311,10 +322,6 @@ Context: config, options key
 Default: undef
 
 Just like C<include_parse> but using regex instead of list.
-
-=cut
-
-has include_parse_regex => (is => 'rw');
 
 =head2 exclude_merge => ARRAYREF
 
@@ -333,10 +340,6 @@ Example:
 
  mode_merge({a=>1}, {"+a"=>20, "-a"=>30}, {exclude_merge=>["a"]}); # {a=>1}
 
-=cut
-
-has exclude_merge => (is => 'rw');
-
 =head2 exclude_merge_regex => REGEX
 
 Context: config, options key
@@ -344,10 +347,6 @@ Context: config, options key
 Default: undef
 
 Just like C<exclude_merge> but using regex instead of list.
-
-=cut
-
-has exclude_merge_regex => (is => 'rw');
 
 =head2 include_merge => ARRAYREF
 
@@ -366,10 +365,6 @@ Example:
  mode_merge({a=>1, b=>2, c=>3}, {"+a"=>40, "+b"=>50, "+c"=>60, "!c"=>70},
             {include_merge=>["a"]}); # {a=>41, b=>2, c=>3}
 
-=cut
-
-has include_merge => (is => 'rw');
-
 =head2 include_merge_regex => ARRAYREF
 
 Context: config, options key
@@ -377,10 +372,6 @@ Context: config, options key
 Default: undef
 
 Just like C<include_merge> but using regex instead of list.
-
-=cut
-
-has include_merge_regex => (is => 'rw');
 
 =head2 set_prefix => HASHREF
 
@@ -394,10 +385,6 @@ string.
 
  mode_merge({a=>1, c=>2}, {'+a'=>10, '.c'=>20});                                        # {a=>11, c=>220}
  mode_merge({a=>1, c=>2}, {'+a'=>10, '.c'=>20}, {set_prefix=>{ADD=>'.', CONCAT=>'+'}}); # {a=>110, c=>22}
-
-=cut
-
-has set_prefix => (is => 'rw');
 
 =head2 readd_prefix => BOOL
 
@@ -413,10 +400,6 @@ their stickiness.
 
  mode_merge({"^a"=>1}, {a=>2});                    # {"^a"=>1}
  mode_merge({"^a"=>1}, {a=>2}, {readd_prefix=>0}); # { "a"=>1}
-
-=cut
-
-has readd_prefix => (is => 'rw', default => sub{1});
 
 =head2 premerge_pair_filter => CODEREF
 
@@ -435,10 +418,6 @@ filter is able to add or remove pairs from the hash.
  mode_merge({a=>1}, {"+amok"=>2},
             {premerge_pair_filter=>sub{ uc(substr($_[0],0,2)), $_[1]*2 }});
  # {"A"=>6}
-
-=cut
-
-has premerge_pair_filter => (is => 'rw');
 
 =head2 options_key => STR
 
@@ -470,10 +449,6 @@ On the above example, C<default_mode> is set to ADD. But in the
 {x=>...} subhash, C<default_mode> is changed to CONCAT by the options
 key.
 
-=cut
-
-has options_key => (is => 'rw', default => sub{''});
-
 =head2 allow_override => REGEX
 
 Context: config
@@ -486,10 +461,6 @@ set in options key.
 If C<disallow_override> is also set, then only config names matching
 C<allow_override> and not matching C<disallow_override> will be able
 to be set in options key.
-
-=cut
-
-has allow_override => (is => 'rw');
 
 =head2 disallow_override => REGEX
 
@@ -510,45 +481,3 @@ If C<disallow_override> is also set, then only config names matching
 C<allow_override> and not matching C<disallow_override> will be able
 to be set in options key.
 
-=cut
-
-has disallow_override => (is => 'rw');
-
-# list of config settings only available in merger-object's config
-# (not in options key)
-sub _config_config {
-    state $a = [qw/
-        wanted_path
-        options_key
-        allow_override
-        disallow_override
-                  /];
-}
-
-# list of config settings available in options key
-sub _config_ok {
-    state $a = [qw/
-        recurse_hash
-        recurse_array
-        parse_prefix
-        default_mode
-        disable_modes
-        allow_create_array
-        allow_create_hash
-        allow_destroy_array
-        allow_destroy_hash
-        exclude_parse
-        exclude_parse_regex
-        include_parse
-        include_parse_regex
-        exclude_merge
-        exclude_merge_regex
-        include_merge
-        include_merge_regex
-        set_prefix
-        readd_prefix
-        premerge_pair_filter
-                  /];
-}
-
-1;

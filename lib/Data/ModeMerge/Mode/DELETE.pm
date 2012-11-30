@@ -1,24 +1,10 @@
 package Data::ModeMerge::Mode::DELETE;
-# ABSTRACT: Handler for Data::ModeMerge DELETE merge mode
-
-=head1 SYNOPSIS
-
-    use Data::ModeMerge;
-
-=head1 DESCRIPTION
-
-This is the class to handle DELETE merge mode.
-
-=for Pod::Coverage ^merge_.*
-
-=cut
 
 use 5.010;
-use strict;
-use warnings;
-
 use Moo;
 extends 'Data::ModeMerge::Mode::Base';
+
+# VERSION
 
 sub name { 'DELETE' }
 
@@ -85,3 +71,15 @@ sub merge_HASH_HASH {
 }
 
 1;
+# ABSTRACT: Handler for Data::ModeMerge DELETE merge mode
+
+=head1 SYNOPSIS
+
+ use Data::ModeMerge;
+
+=head1 DESCRIPTION
+
+This is the class to handle DELETE merge mode.
+
+=for Pod::Coverage ^merge_.*
+

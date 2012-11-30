@@ -1,306 +1,22 @@
 package Data::ModeMerge;
-# ABSTRACT: Merge two nested data structures, with merging modes and options
-
-=head1 SYNOPSIS
-
-    use Data::ModeMerge;
-
-    my $hash1 = { a=>1,    c=>1, d=>{  da =>[1]} };
-    my $hash2 = { a=>2, "-c"=>2, d=>{"+da"=>[2]} };
-
-
-    # if you want Data::ModeMerge to behave like many other merging
-    # modules (e.g. Hash::Merge or Data::Merger), turn off modes
-    # (prefix) parsing and options key parsing.
-
-    my $mm = new Data::ModeMerge(config => {parse_prefix=>0, options_key=>undef});
-    my $res = $mm->merge($hash1, $hash2);
-    die $res->{error} if $res->{error};
-    # $res->{result} -> { a=>2, c=>1, "-c"=>2, d=>{da=>[1], "+da"=>[2]} }
-
-
-    # otherwise Data::ModeMerge will parse prefix as well as options
-    # key
-
-    my $res = $mm->merge($hash1, $hash2);
-    die $res->{error} if $res->{error};
-    # $res->{result} -> { a=>2, c=>-1, d=>{da=>[1,2]} }
-
-    $res = $merge({  a =>1, {  a2 =>1, ""=>{parse_prefix=>0}},
-                  {".a"=>2, {".a2"=>2                       }});
-    # $res->{result} -> { a=>12, {a2=>1, ".a2"=>2} }, parse_prefix is turned off in just the subhash
-
-
-    # procedural interface
-
-    my $res = mode_merge($hash1, $hash2, {allow_destroy_hash=>0});
-
-=head1 DESCRIPTION
-
-There are already several modules on CPAN to do recursive data
-structure merging, like L<Data::Merger> and
-L<Hash::Merge>. C<Data::ModeMerge> differs in that it offers merging
-"modes" and "options". It provides greater flexibility on what the
-result of a merge between two data should/can be. This module may or
-may not be what you need.
-
-One application of this module is in handling configuration. Often
-there are multiple levels of configuration, e.g. in your typical Unix
-command-line program there are system-wide config file in /etc,
-per-user config file under ~/, and command-line options. It's
-convenient programatically to load each of those in a hash and then
-merge system-wide hash with the per-user hash, and then merge the
-result with the command-line hash to get the a single hash as the
-final configuration. Your program can from there on deal with this
-just one hash instead of three.
-
-In a typical merging process between two hashes (left-side and
-right-side), when there is a conflicting key, then the right-side key
-will override the left-side. This is usually the desired behaviour in
-our said program as the system-wide config is there to provide
-defaults, and the per-user config (and the command-line arguments)
-allow a user to override those defaults.
-
-But suppose that the user wants to I<unset> a certain configuration
-setting that is defined by the system-wide config? She can't do that
-unless she edits the system-wide config (in which she might need admin
-rights), or the program allows the user to disregard the system-wide
-config. The latter is usually what's implemented by many Unix
-programs, e.g. the C<-noconfig> command-line option in C<mplayer>. But
-this has two drawbacks: a slightly added complexity in the program
-(need to provide a special, extra comand-line option) and the user
-loses all the default settings in the system-wide config. What she
-needed in the first place was to just unset I<a single setting> (a
-single key-value pair of the hash).
-
-L<Data::ModeMerge> comes to the rescue. It provides a so-called
-C<DELETE mode>.
-
- mode_merge({foo=>1, bar=>2}, {"!foo"=>undef, bar=>3, baz=>1});
-
-will result ini:
-
- {bar=>3, baz=>1}
-
-The C<!> prefix tells Data::ModeMerge to do a DELETE mode merging. So
-the final result will lack the C<foo> key.
-
-On the other hand, what if the system admin wants to I<protect> a
-certain configuration setting from being overriden by the user or the
-command-line? This is useful in a hosting or other retrictive
-environment where we want to limit users' freedom to some levels. This
-is possible via the KEEP mode merging.
-
- mode_merge({"^bar"=>2, "^baz"=>1}, {bar=>3, "!baz"=>0, qux=>7});
-
-will result in:
-
- {"^bar"=>2, "^baz"=>1, qux=>7}
-
-effectively protecting C<bar> and C<baz> from being
-overriden/deleted/etc.
-
-Aside from the two mentioned modes, there are also a few others
-available by default: ADD (prefix C<+>), CONCAT (prefix C<.>),
-SUBTRACT (prefix C<->), as well as the plain ol' NORMAL/override
-(optional prefix C<*>).
-
-You can add other modes by writing a mode handler module.
-
-You can change the default prefixes for each mode if you want. You can
-disable each mode individually.
-
-You can default to always using a certain mode, like the NORMAL mode,
-and ignore all the prefixes, in which case Data::ModeMerge will behave
-like most other merge modules.
-
-There are a few other options like whether or not the right side is
-allowed a "change the structure" of the left side (e.g. replacing a
-scalar with an array/hash, destroying an existing array/hash with
-scalar), maximum length of scalar/array/hash, etc.
-
-You can change default mode, prefixes, disable/enable modes, etc on a
-per-hash basis using the so-called B<options key>. See the B<OPTIONS
-KEY> section for more details.
-
-This module can handle (though not all possible cases)
-circular/recursive references.
-
-=head1 MERGING PREFIXES AND YOUR DATA
-
-Merging with this module means you need to be careful when your hash
-keys might contain one of the mode prefixes characters by accident,
-because it will trigger the wrong merge mode and moreover the prefix
-characters will be B<stripped> from the final result (unless you
-configure the module not to do so).
-
-A rather common case is when you have regexes in your hash
-keys. Regexes often begins with C<^>, which coincidentally is a prefix
-for the KEEP mode. Or perhaps you have dot filenames as hash keys,
-where it clashes with the CONCAT mode. Or perhaps shell wildcards,
-where C<*> is also used as the prefix for NORMAL mode.
-
-To avoid clashes, you can either:
-
-=over 4
-
-=item * exclude the keys using
-C<exclude_merge>/C<include_merge>/C<exclude_parse>/C<include_parse>
-config settings
-
-=item * turn off some modes which you don't want via the
-C<disable_modes> config
-
-=item * change the prefix for that mode so that it doesn't clash with
-your data via the C<set_prefix> config
-
-=item * disable prefix parsing altogether via setting C<parse_prefix>
-config to 0
-
-=back
-
-You can do this via the configuration, or on a per-hash basis, using
-the options key.
-
-See L<Data::ModeMerge::Config> for more details on configuration.
-
-=head1 OPTIONS KEY
-
-Aside from merging mode prefixes, you also need to watch out if your
-hash contains a "" (empty string) key, because by default this is the
-key used for options key.
-
-Options key are used to specify configuration on a per-hash basis.
-
-If your hash keys might contain "" keys which are not meant to be an
-options key, you can either:
-
-=over 4
-
-=item * change the name of the key for options key, via setting
-C<options_key> config to another string.
-
-=item * turn off options key mechanism,
-by setting C<options_key> config to undef.
-
-=back
-
-See L<Data::ModeMerge::Config> for more details about options key.
-
-=head1 MERGING MODES
-
-=head2 NORMAL (optional '*' prefix on left/right side)
-
- mode_merge({  a =>11, b=>12}, {  b =>22, c=>23}); # {a=>11, b=>22, c=>23}
- mode_merge({"*a"=>11, b=>12}, {"*b"=>22, c=>23}); # {a=>11, b=>22, c=>23}
-
-=head2 ADD ('+' prefix on the right side)
-
- mode_merge({i=>3}, {"+i"=>4, "+j"=>1}); # {i=>7, j=>1}
- mode_merge({a=>[1]}, {"+a"=>[2, 3]}); # {a=>[1, 2, 3]}
-
-Additive merge on hashes will be treated like a normal merge.
-
-=head2 CONCAT ('.' prefix on the right side)
-
- mode_merge({i=>3}, {".i"=>4, ".j"=>1}); # {i=>34, j=>1}
-
-Concative merge on arrays will be treated like additive merge.
-
-=head2 SUBTRACT ('-' prefix on the right side)
-
- mode_merge({i=>3}, {"-i"=>4}); # {i=>-1}
- mode_merge({a=>["a","b","c"]}, {"-a"=>["b"]}); # {a=>["a","c"]}
-
-Subtractive merge on hashes behaves like a normal merge, except that
-each key on the right-side hash without any prefix will be assumed to
-have a DELETE prefix, i.e.:
-
- mode_merge({h=>{a=>1, b=>1}}, {-h=>{a=>2, "+b"=>2, c=>2}})
-
-is equivalent to:
-
- mode_merge({h=>{a=>1, b=>1}}, {h=>{"!a"=>2, "+b"=>2, "!c"=>2}})
-
-and will merge to become:
-
- {h=>{b=>3}}
-
-=head2 DELETE ('!' prefix on the right side)
-
- mode_merge({x=>WHATEVER}, {"!x"=>WHATEVER}); # {}
-
-=head2 KEEP ('^' prefix on the left/right side)
-
-If you add '^' prefix on the left side, it will be protected from
-being replaced/deleted/etc.
-
- mode_merge({'^x'=>WHATEVER1}, {"x"=>WHATEVER2}); # {x=>WHATEVER1}
-
-For hashes, KEEP mode means that all keys on the left side will not be
-replaced/modified/deleted, *but* you can still add more keys from the
-right side hash.
-
- mode_merge({a=>1, b=>2, c=>3},
-            {a=>4, '^c'=>1, d=>5},
-            {default_mode=>'KEEP'});
-            # {a=>1, b=>2, c=>3, d=>5}
-
-Multiple prefixes on the right side is allowed, where the merging will
-be done by precedence level (highest first):
-
- mode_merge({a=>[1,2]}, {'-a'=>[1], '+a'=>[10]}); # {a=>[2,10]}
-
-but not on the left side:
-
- mode_merge({a=>1, '^a'=>2}, {a=>3}); # error!
-
-Precedence levels (from highest to lowest):
-
- KEEP
- NORMAL
- SUBTRACT
- CONCAT ADD
- DELETE
-
-=cut
 
 use 5.010;
-use strict;
-use warnings;
-
-use Data::ModeMerge::Config;
-use Data::Dumper;
 use Moo;
+
+use Data::Dumper;
+use Data::ModeMerge::Config;
 
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(mode_merge);
 
-=head1 FUNCTIONS
-
-=head2 mode_merge($l, $r[, $config_vars])
-
-A non-OO wrapper for merge() method. Exported by default. See C<merge>
-method for more details.
-
-=cut
+# VERSION
 
 sub mode_merge {
     my ($l, $r, $config_vars) = @_;
     my $mm = __PACKAGE__->new(config => $config_vars);
     $mm->merge($l, $r);
 }
-
-=head1 ATTRIBUTES
-
-=cut
-
-=head2 config
-
-A hashref for config. See L<Data::ModeMerge::Config>.
-
-=cut
 
 has config => (is => "rw");
 
@@ -315,14 +31,6 @@ has path => (is => "rw", default => sub { [] });
 has errors => (is => "rw", default => sub { [] });
 has mem => (is => "rw", default => sub { {} }); # for handling circular refs. {key=>{res=>[...], todo=>[sub1, ...]}, ...}
 has cur_mem_key => (is => "rw"); # for handling circular refs. instead of passing around this as argument, we put it here.
-
-=head1 METHODS
-
-For typical usage, you only need merge().
-
-=for Pod::Coverage ^BUILD$
-
-=cut
 
 sub _dump {
     my ($self, $var) = @_;
@@ -408,24 +116,11 @@ sub BUILD {
     }
 }
 
-=head2 push_error($errmsg)
-
-Used by mode handlers to push error when doing merge. End users
-normally should not need this.
-
-=cut
-
 sub push_error {
     my ($self, $errmsg) = @_;
     push @{ $self->errors }, [[@{ $self->path }], $errmsg];
     return;
 }
-
-=head2 register_mode($name_or_package_or_obj)
-
-Register a mode. Will die if mode with the same name already exists.
-
-=cut
 
 sub register_mode {
     my ($self, $name0) = @_;
@@ -448,13 +143,6 @@ sub register_mode {
     $self->modes->{$name} = $obj;
 }
 
-=head2 check_prefix($hash_key)
-
-Check whether hash key has prefix for certain mode. Return the name of
-the mode, or undef if no prefix is detected.
-
-=cut
-
 sub check_prefix {
     my ($self, $hash_key) = @_;
     die "Hash key not a string" if ref($hash_key);
@@ -473,13 +161,6 @@ sub check_prefix {
     return;
 }
 
-=head2 check_prefix_on_hash($hash)
-
-This is like C<check_prefix> but performed on every key of the
-specified hash. Return true if any of the key contain a merge prefix.
-
-=cut
-
 sub check_prefix_on_hash {
     my ($self, $hash) = @_;
     die "Not a hash" unless ref($hash) eq 'HASH';
@@ -489,13 +170,6 @@ sub check_prefix_on_hash {
     }
     $res;
 }
-
-=head2 add_prefix($hash_key, $mode)
-
-Return hash key with added prefix with specified mode. Log merge error
-if mode is unknown or is disabled.
-
-=cut
 
 sub add_prefix {
     my ($self, $hash_key, $mode) = @_;
@@ -511,12 +185,6 @@ sub add_prefix {
     my $mh = $self->modes->{$mode} or die "Unknown mode: $mode";
     $mh->add_prefix($hash_key);
 }
-
-=head2 remove_prefix($hash_key)
-
-Return hash key will any prefix removed.
-
-=cut
 
 sub remove_prefix {
     my ($self, $hash_key) = @_;
@@ -538,13 +206,6 @@ sub remove_prefix {
     else           { return $hash_key }
 }
 
-=head2 remove_prefix_on_hash($hash)
-
-This is like C<remove_prefix> but performed on every key of the
-specified hash. Return the same hash but with prefixes removed.
-
-=cut
-
 sub remove_prefix_on_hash {
     my ($self, $hash) = @_;
     die "Not a hash" unless ref($hash) eq 'HASH';
@@ -560,42 +221,17 @@ sub remove_prefix_on_hash {
     $hash;
 }
 
-=head2 save_config()
-
-Called by mode handlers to save configuration before recursive
-merge. This is because many configuration settings can be overriden by
-options key.
-
-=cut
-
 sub save_config {
     my ($self) = @_;
     my %config = %{ $self->config() };
     push @{ $self->config_stack }, \%config;
 }
 
-=head2 restore_config()
-
-Called by mode handlers to restore configuration saved by
-save_config().
-
-=cut
-
 sub restore_config {
     my ($self) = @_;
     my $config = pop @{ $self->config_stack };
     $self->config(Data::ModeMerge::Config->new(%$config));
 }
-
-=head2 merge($l, $r)
-
-Merge two nested data structures. Returns the result hash: {
-success=>0|1, error=>'...', result=>..., backup=>... }. The 'error'
-key is set to contain an error message if there is an error. The merge
-result is in the 'result' key. The 'backup' key contains replaced
-elements from the original hash/array.
-
-=cut
 
 sub merge {
     my ($self, $l, $r) = @_;
@@ -718,6 +354,364 @@ sub _path_is_included {
     $res;
 }
 
+1;
+# ABSTRACT: Merge two nested data structures, with merging modes and options
+
+=for Pod::Coverage ^(BUILD)$
+
+=head1 SYNOPSIS
+
+    use Data::ModeMerge;
+
+    my $hash1 = { a=>1,    c=>1, d=>{  da =>[1]} };
+    my $hash2 = { a=>2, "-c"=>2, d=>{"+da"=>[2]} };
+
+
+    # if you want Data::ModeMerge to behave like many other merging
+    # modules (e.g. Hash::Merge or Data::Merger), turn off modes
+    # (prefix) parsing and options key parsing.
+
+    my $mm = new Data::ModeMerge(config => {parse_prefix=>0, options_key=>undef});
+    my $res = $mm->merge($hash1, $hash2);
+    die $res->{error} if $res->{error};
+    # $res->{result} -> { a=>2, c=>1, "-c"=>2, d=>{da=>[1], "+da"=>[2]} }
+
+
+    # otherwise Data::ModeMerge will parse prefix as well as options
+    # key
+
+    my $res = $mm->merge($hash1, $hash2);
+    die $res->{error} if $res->{error};
+    # $res->{result} -> { a=>2, c=>-1, d=>{da=>[1,2]} }
+
+    $res = $merge({  a =>1, {  a2 =>1, ""=>{parse_prefix=>0}},
+                  {".a"=>2, {".a2"=>2                       }});
+    # $res->{result} -> { a=>12, {a2=>1, ".a2"=>2} }, parse_prefix is turned off in just the subhash
+
+
+    # procedural interface
+
+    my $res = mode_merge($hash1, $hash2, {allow_destroy_hash=>0});
+
+
+=head1 DESCRIPTION
+
+There are already several modules on CPAN to do recursive data
+structure merging, like L<Data::Merger> and
+L<Hash::Merge>. C<Data::ModeMerge> differs in that it offers merging
+"modes" and "options". It provides greater flexibility on what the
+result of a merge between two data should/can be. This module may or
+may not be what you need.
+
+One application of this module is in handling configuration. Often
+there are multiple levels of configuration, e.g. in your typical Unix
+command-line program there are system-wide config file in /etc,
+per-user config file under ~/, and command-line options. It's
+convenient programatically to load each of those in a hash and then
+merge system-wide hash with the per-user hash, and then merge the
+result with the command-line hash to get the a single hash as the
+final configuration. Your program can from there on deal with this
+just one hash instead of three.
+
+In a typical merging process between two hashes (left-side and
+right-side), when there is a conflicting key, then the right-side key
+will override the left-side. This is usually the desired behaviour in
+our said program as the system-wide config is there to provide
+defaults, and the per-user config (and the command-line arguments)
+allow a user to override those defaults.
+
+But suppose that the user wants to I<unset> a certain configuration
+setting that is defined by the system-wide config? She can't do that
+unless she edits the system-wide config (in which she might need admin
+rights), or the program allows the user to disregard the system-wide
+config. The latter is usually what's implemented by many Unix
+programs, e.g. the C<-noconfig> command-line option in C<mplayer>. But
+this has two drawbacks: a slightly added complexity in the program
+(need to provide a special, extra comand-line option) and the user
+loses all the default settings in the system-wide config. What she
+needed in the first place was to just unset I<a single setting> (a
+single key-value pair of the hash).
+
+L<Data::ModeMerge> comes to the rescue. It provides a so-called
+C<DELETE mode>.
+
+ mode_merge({foo=>1, bar=>2}, {"!foo"=>undef, bar=>3, baz=>1});
+
+will result ini:
+
+ {bar=>3, baz=>1}
+
+The C<!> prefix tells Data::ModeMerge to do a DELETE mode merging. So
+the final result will lack the C<foo> key.
+
+On the other hand, what if the system admin wants to I<protect> a
+certain configuration setting from being overriden by the user or the
+command-line? This is useful in a hosting or other retrictive
+environment where we want to limit users' freedom to some levels. This
+is possible via the KEEP mode merging.
+
+ mode_merge({"^bar"=>2, "^baz"=>1}, {bar=>3, "!baz"=>0, qux=>7});
+
+will result in:
+
+ {"^bar"=>2, "^baz"=>1, qux=>7}
+
+effectively protecting C<bar> and C<baz> from being
+overriden/deleted/etc.
+
+Aside from the two mentioned modes, there are also a few others
+available by default: ADD (prefix C<+>), CONCAT (prefix C<.>),
+SUBTRACT (prefix C<->), as well as the plain ol' NORMAL/override
+(optional prefix C<*>).
+
+You can add other modes by writing a mode handler module.
+
+You can change the default prefixes for each mode if you want. You can
+disable each mode individually.
+
+You can default to always using a certain mode, like the NORMAL mode,
+and ignore all the prefixes, in which case Data::ModeMerge will behave
+like most other merge modules.
+
+There are a few other options like whether or not the right side is
+allowed a "change the structure" of the left side (e.g. replacing a
+scalar with an array/hash, destroying an existing array/hash with
+scalar), maximum length of scalar/array/hash, etc.
+
+You can change default mode, prefixes, disable/enable modes, etc on a
+per-hash basis using the so-called B<options key>. See the B<OPTIONS
+KEY> section for more details.
+
+This module can handle (though not all possible cases)
+circular/recursive references.
+
+
+=head1 MERGING PREFIXES AND YOUR DATA
+
+Merging with this module means you need to be careful when your hash
+keys might contain one of the mode prefixes characters by accident,
+because it will trigger the wrong merge mode and moreover the prefix
+characters will be B<stripped> from the final result (unless you
+configure the module not to do so).
+
+A rather common case is when you have regexes in your hash
+keys. Regexes often begins with C<^>, which coincidentally is a prefix
+for the KEEP mode. Or perhaps you have dot filenames as hash keys,
+where it clashes with the CONCAT mode. Or perhaps shell wildcards,
+where C<*> is also used as the prefix for NORMAL mode.
+
+To avoid clashes, you can either:
+
+=over 4
+
+=item * exclude the keys using
+C<exclude_merge>/C<include_merge>/C<exclude_parse>/C<include_parse>
+config settings
+
+=item * turn off some modes which you don't want via the
+C<disable_modes> config
+
+=item * change the prefix for that mode so that it doesn't clash with
+your data via the C<set_prefix> config
+
+=item * disable prefix parsing altogether via setting C<parse_prefix>
+config to 0
+
+=back
+
+You can do this via the configuration, or on a per-hash basis, using
+the options key.
+
+See L<Data::ModeMerge::Config> for more details on configuration.
+
+
+=head1 OPTIONS KEY
+
+Aside from merging mode prefixes, you also need to watch out if your
+hash contains a "" (empty string) key, because by default this is the
+key used for options key.
+
+Options key are used to specify configuration on a per-hash basis.
+
+If your hash keys might contain "" keys which are not meant to be an
+options key, you can either:
+
+=over 4
+
+=item * change the name of the key for options key, via setting
+C<options_key> config to another string.
+
+=item * turn off options key mechanism,
+by setting C<options_key> config to undef.
+
+=back
+
+See L<Data::ModeMerge::Config> for more details about options key.
+
+
+=head1 MERGING MODES
+
+=head2 NORMAL (optional '*' prefix on left/right side)
+
+ mode_merge({  a =>11, b=>12}, {  b =>22, c=>23}); # {a=>11, b=>22, c=>23}
+ mode_merge({"*a"=>11, b=>12}, {"*b"=>22, c=>23}); # {a=>11, b=>22, c=>23}
+
+=head2 ADD ('+' prefix on the right side)
+
+ mode_merge({i=>3}, {"+i"=>4, "+j"=>1}); # {i=>7, j=>1}
+ mode_merge({a=>[1]}, {"+a"=>[2, 3]}); # {a=>[1, 2, 3]}
+
+Additive merge on hashes will be treated like a normal merge.
+
+=head2 CONCAT ('.' prefix on the right side)
+
+ mode_merge({i=>3}, {".i"=>4, ".j"=>1}); # {i=>34, j=>1}
+
+Concative merge on arrays will be treated like additive merge.
+
+=head2 SUBTRACT ('-' prefix on the right side)
+
+ mode_merge({i=>3}, {"-i"=>4}); # {i=>-1}
+ mode_merge({a=>["a","b","c"]}, {"-a"=>["b"]}); # {a=>["a","c"]}
+
+Subtractive merge on hashes behaves like a normal merge, except that
+each key on the right-side hash without any prefix will be assumed to
+have a DELETE prefix, i.e.:
+
+ mode_merge({h=>{a=>1, b=>1}}, {-h=>{a=>2, "+b"=>2, c=>2}})
+
+is equivalent to:
+
+ mode_merge({h=>{a=>1, b=>1}}, {h=>{"!a"=>2, "+b"=>2, "!c"=>2}})
+
+and will merge to become:
+
+ {h=>{b=>3}}
+
+=head2 DELETE ('!' prefix on the right side)
+
+ mode_merge({x=>WHATEVER}, {"!x"=>WHATEVER}); # {}
+
+=head2 KEEP ('^' prefix on the left/right side)
+
+If you add '^' prefix on the left side, it will be protected from
+being replaced/deleted/etc.
+
+ mode_merge({'^x'=>WHATEVER1}, {"x"=>WHATEVER2}); # {x=>WHATEVER1}
+
+For hashes, KEEP mode means that all keys on the left side will not be
+replaced/modified/deleted, *but* you can still add more keys from the
+right side hash.
+
+ mode_merge({a=>1, b=>2, c=>3},
+            {a=>4, '^c'=>1, d=>5},
+            {default_mode=>'KEEP'});
+            # {a=>1, b=>2, c=>3, d=>5}
+
+Multiple prefixes on the right side is allowed, where the merging will
+be done by precedence level (highest first):
+
+ mode_merge({a=>[1,2]}, {'-a'=>[1], '+a'=>[10]}); # {a=>[2,10]}
+
+but not on the left side:
+
+ mode_merge({a=>1, '^a'=>2}, {a=>3}); # error!
+
+Precedence levels (from highest to lowest):
+
+ KEEP
+ NORMAL
+ SUBTRACT
+ CONCAT ADD
+ DELETE
+
+
+=head1 FUNCTIONS
+
+=head2 mode_merge($l, $r[, $config_vars])
+
+A non-OO wrapper for merge() method. Exported by default. See C<merge>
+method for more details.
+
+
+=head1 ATTRIBUTES
+
+=head2 config
+
+A hashref for config. See L<Data::ModeMerge::Config>.
+
+=head2 modes
+
+=head2 combine_rules
+
+=head2 config_stack
+
+=head2 path
+
+=head2 errors
+
+=head2 mem
+
+=head2 cur_mem_key
+
+
+=head1 METHODS
+
+For typical usage, you only need merge().
+
+=head2 push_error($errmsg)
+
+Used by mode handlers to push error when doing merge. End users
+normally should not need this.
+
+=head2 register_mode($name_or_package_or_obj)
+
+Register a mode. Will die if mode with the same name already exists.
+
+=head2 check_prefix($hash_key)
+
+Check whether hash key has prefix for certain mode. Return the name of
+the mode, or undef if no prefix is detected.
+
+=head2 check_prefix_on_hash($hash)
+
+This is like C<check_prefix> but performed on every key of the
+specified hash. Return true if any of the key contain a merge prefix.
+
+=head2 add_prefix($hash_key, $mode)
+
+Return hash key with added prefix with specified mode. Log merge error
+if mode is unknown or is disabled.
+
+=head2 remove_prefix($hash_key)
+
+Return hash key will any prefix removed.
+
+=head2 remove_prefix_on_hash($hash)
+
+This is like C<remove_prefix> but performed on every key of the
+specified hash. Return the same hash but with prefixes removed.
+
+=head2 save_config()
+
+Called by mode handlers to save configuration before recursive
+merge. This is because many configuration settings can be overriden by
+options key.
+
+=head2 restore_config()
+
+Called by mode handlers to restore configuration saved by
+save_config().
+
+=head2 merge($l, $r)
+
+Merge two nested data structures. Returns the result hash: {
+success=>0|1, error=>'...', result=>..., backup=>... }. The 'error'
+key is set to contain an error message if there is an error. The merge
+result is in the 'result' key. The 'backup' key contains replaced
+elements from the original hash/array.
+
+
 =head1 CREATING AND USING YOUR OWN MODE
 
 Let's say you want to add a mode named C<FOO>. It will have the prefix
@@ -785,6 +779,3 @@ L<Hash::Merge>, L<Hash::Merge::Simple>
 L<Data::Schema> and L<Config::Tree> (among others, two modules which
 use Data::ModeMerge)
 
-=cut
-
-1;

@@ -1,29 +1,11 @@
 package Data::ModeMerge::Mode::Base;
-# ABSTRACT: Base class for Data::ModeMerge mode handler
-
-=head1 SYNOPSIS
-
-    use Data::ModeMerge;
-
-=head1 DESCRIPTION
-
-This is the base class for mode type handlers.
-
-=for Pod::Coverage ^merge_.*
-
-=cut
 
 use 5.010;
-use strict;
-use warnings;
-
-#use Storable; # qw/dclone/;
-use Data::Clone qw/clone/;
 use Moo;
 
-=head1 ATTRIBUTES
+use Data::Clone qw/clone/;
 
-=cut
+# VERSION
 
 has merger => (is => 'rw');
 has prefix => (is => 'rw');
@@ -32,48 +14,17 @@ has check_prefix_sub => (is => 'rw');
 has add_prefix_sub => (is => 'rw');
 has remove_prefix_sub => (is => 'rw');
 
-=head1 METHODS
-
-=for Pod::Coverage BUILD
-
-=cut
-
-=head2 name
-
-Return name of mode. Subclass must override this method.
-
-=cut
-
 sub name {
     die "Subclass must provide name()";
 }
-
-=head2 precedence_level
-
-Return precedence level, which is a number. The greater the number,
-the higher the precedence. Subclass must override this method.
-
-=cut
 
 sub precedence_level {
     die "Subclass must provide precedence_level()";
 }
 
-=head2 default_prefix
-
-Return default prefix. Subclass must override this method.
-
-=cut
-
 sub default_prefix {
     die "Subclass must provide default_prefix()";
 }
-
-=head2 default_prefix_re
-
-Return default prefix regex. Subclass must override this method.
-
-=cut
 
 sub default_prefix_re {
     die "Subclass must provide default_prefix_re()";
@@ -85,12 +36,6 @@ sub BUILD {
     $self->prefix_re($self->default_prefix_re);
 }
 
-=head2 check_prefix($hash_key)
-
-Return true if hash key has prefix for this mode.
-
-=cut
-
 sub check_prefix {
     my ($self, $hash_key) = @_;
     if ($self->check_prefix_sub) {
@@ -100,12 +45,6 @@ sub check_prefix {
     }
 }
 
-=head2 add_prefix($hash_key)
-
-Return hash key with added prefix of this mode.
-
-=cut
-
 sub add_prefix {
     my ($self, $hash_key) = @_;
     if ($self->add_prefix_sub) {
@@ -114,12 +53,6 @@ sub add_prefix {
         $self->prefix . $hash_key;
     }
 }
-
-=head2 remove_prefix($hash_key)
-
-Return hash key with prefix of this mode prefix removed.
-
-=cut
 
 sub remove_prefix {
     my ($self, $hash_key) = @_;
@@ -625,3 +558,64 @@ sub merge_HASH_HASH {
 }
 
 1;
+# ABSTRACT: Base class for Data::ModeMerge mode handler
+
+=for Pod::Coverage ^(BUILD|merge_.+)$
+
+=head1 SYNOPSIS
+
+ use Data::ModeMerge;
+
+
+=head1 DESCRIPTION
+
+This is the base class for mode type handlers.
+
+
+=head1 ATTRIBUTES
+
+=head2 merger
+
+=head2 prefix
+
+=head2 prefix_re
+
+=head2 check_prefix_sub
+
+=head2 add_prefix_sub
+
+=head2 remove_prefix_sub
+
+
+=head1 METHODS
+
+=head2 name
+
+Return name of mode. Subclass must override this method.
+
+=head2 precedence_level
+
+Return precedence level, which is a number. The greater the number,
+the higher the precedence. Subclass must override this method.
+
+=head2 default_prefix
+
+Return default prefix. Subclass must override this method.
+
+=head2 default_prefix_re
+
+Return default prefix regex. Subclass must override this method.
+
+=head2 check_prefix($hash_key)
+
+Return true if hash key has prefix for this mode.
+
+=head2 add_prefix($hash_key)
+
+Return hash key with added prefix of this mode.
+
+=head2 remove_prefix($hash_key)
+
+Return hash key with prefix of this mode prefix removed.
+
+=cut
