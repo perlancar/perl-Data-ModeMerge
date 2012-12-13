@@ -26,7 +26,6 @@ has modes => (is => 'rw', default => sub { {} });
 has combine_rules => (is => 'rw');
 
 # merging process state
-has config_stack => (is => "rw");
 has path => (is => "rw", default => sub { [] });
 has errors => (is => "rw", default => sub { [] });
 has mem => (is => "rw", default => sub { {} }); # for handling circular refs. {key=>{res=>[...], todo=>[sub1, ...]}, ...}
@@ -34,7 +33,7 @@ has cur_mem_key => (is => "rw"); # for handling circular refs. instead of passin
 
 sub _dump {
     my ($self, $var) = @_;
-    Data::Dumper->new([$var])->Indent(0)->Terse(1)->Dump;
+    Data::Dumper->new([$var])->Indent(0)->Terse(1)->Sortkeys(1)->Dump;
 }
 
 sub _in($$) {
@@ -221,21 +220,8 @@ sub remove_prefix_on_hash {
     $hash;
 }
 
-sub save_config {
-    my ($self) = @_;
-    my %config = %{ $self->config() };
-    push @{ $self->config_stack }, \%config;
-}
-
-sub restore_config {
-    my ($self) = @_;
-    my $config = pop @{ $self->config_stack };
-    $self->config(Data::ModeMerge::Config->new(%$config));
-}
-
 sub merge {
     my ($self, $l, $r) = @_;
-    $self->config_stack([]);
     $self->path([]);
     $self->errors([]);
     $self->mem({});
@@ -644,8 +630,6 @@ A hashref for config. See L<Data::ModeMerge::Config>.
 
 =head2 combine_rules
 
-=head2 config_stack
-
 =head2 path
 
 =head2 errors
@@ -691,17 +675,6 @@ Return hash key will any prefix removed.
 
 This is like C<remove_prefix> but performed on every key of the
 specified hash. Return the same hash but with prefixes removed.
-
-=head2 save_config()
-
-Called by mode handlers to save configuration before recursive
-merge. This is because many configuration settings can be overriden by
-options key.
-
-=head2 restore_config()
-
-Called by mode handlers to restore configuration saved by
-save_config().
 
 =head2 merge($l, $r)
 
