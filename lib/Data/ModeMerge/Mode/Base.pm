@@ -4,7 +4,7 @@ use 5.010;
 use Log::Any '$log';
 use Moo;
 
-use Data::Clone qw/clone/;
+#use Data::Clone qw/clone/;
 
 # VERSION
 
