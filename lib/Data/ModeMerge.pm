@@ -1,6 +1,6 @@
 package Data::ModeMerge;
 
-use 5.010;
+use 5.010001;
 use Moo;
 
 use Data::Dumper;
@@ -127,11 +127,11 @@ sub register_mode {
     if (ref($name0)) {
         my $obj = $name0;
     } elsif ($name0 =~ /^\w+(::\w+)+$/) {
-        eval "require $name0; \$obj = new $name0";
+        eval "require $name0; \$obj = $name0->new";
         die "Can't load module $name0: $@" if $@;
     } elsif ($name0 =~ /^\w+$/) {
         my $modname = "Data::ModeMerge::Mode::$name0";
-        eval "require $modname; \$obj = new $modname";
+        eval "require $modname; \$obj = $modname->new";
         die "Can't load module $modname: $@" if $@;
     } else {
         die "Invalid mode name $name0";
@@ -357,7 +357,7 @@ sub _path_is_included {
     # modules (e.g. Hash::Merge or Data::Merger), turn off modes
     # (prefix) parsing and options key parsing.
 
-    my $mm = new Data::ModeMerge(config => {parse_prefix=>0, options_key=>undef});
+    my $mm = Data::ModeMerge->new(config => {parse_prefix=>0, options_key=>undef});
     my $res = $mm->merge($hash1, $hash2);
     die $res->{error} if $res->{error};
     # $res->{result} -> { a=>2, c=>1, "-c"=>2, d=>{da=>[1], "+da"=>[2]} }
