@@ -146,15 +146,15 @@ Example:
  mode_merge(
    {
     user => {
-      steven => { quota => 100, admin => 1 },
-      tommie => { quota =>  50, admin => 0 },
-      jimmy  => { quota => 150, admin => 0 },
+      jajang => { quota => 100, admin => 1 },
+      paijo  => { quota =>  50, admin => 0 },
+      kuya   => { quota => 150, admin => 0 },
     },
     groups => [qw/admin staff/],
    },
    {
     user => {
-      steven => { quota => 1000 },
+      jajang => { quota => 1000 },
     }
    }
  );
@@ -163,20 +163,20 @@ With wanted_path unset, the result would be:
 
    {
     user => {
-      steven => { quota => 1000, admin => 1 },
-      tommie => { quota =>   50, admin => 0 },
-      jimmy  => { quota =>  150, admin => 0 },
+      jajang => { quota => 1000, admin => 1 },
+      paijo  => { quota =>   50, admin => 0 },
+      kuya   => { quota =>  150, admin => 0 },
     }
     groups => [qw/admin staff/],
    }
 
-With wanted_path set to ["user", "steven", "quota"] (in other words,
+With wanted_path set to ["user", "jajang", "quota"] (in other words,
 you're saying that you'll be disregarding other branches), the result
 would be:
 
    {
     user => {
-      steven => { quota => 1000, admin => undef },
+      jajang => { quota => 1000, admin => undef },
     }
    }
 

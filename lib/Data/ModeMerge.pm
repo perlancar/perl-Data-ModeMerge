@@ -328,8 +328,8 @@ sub _merge {
     }
 }
 
-# returns 1 if a is included in b (e.g. [user => "steven"] in included in [user
-# => steven => "quota"], but [user => "rudi"] is not)
+# returns 1 if a is included in b (e.g. [user => "jajang"] in included in [user
+# => jajang => "quota"], but [user => "paijo"] is not)
 sub _path_is_included {
     my ($self, $p1, $p2) = @_;
     my $res = 1;
