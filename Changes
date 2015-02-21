@@ -1,8 +1,18 @@
 Revision history for Data-ModeMerge
 
+0.32    2015-02-21 (PERLANCAR)
+
+	- No functional changes.
+
+        - Delay loading Data::Dumper and Data::ModeMerge::Config to further
+          reduce startup overhead.
+
+
 0.31    2015-02-21 (PERLANCAR)
 
-	- Switch from Moo to Mo to further reduce startup overhead.
+	- No functional changes.
+
+	- Switch from Moo to Mo to reduce startup overhead.
 
 
 0.30    2013-07-16 (SHARYANTO)
