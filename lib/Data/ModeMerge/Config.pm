@@ -1,9 +1,10 @@
 package Data::ModeMerge::Config;
 
-use 5.010;
-use Moo;
-
+# DATE
 # VERSION
+
+use 5.010;
+use Mo qw(build default);
 
 has recurse_hash          => (is => 'rw', default => sub{1});
 has recurse_array         => (is => 'rw', default => sub{0});

@@ -1,10 +1,13 @@
 package Data::ModeMerge::Mode::SUBTRACT;
 
-use 5.010;
-use Moo;
-extends 'Data::ModeMerge::Mode::NORMAL';
-
+# DATE
 # VERSION
+
+use 5.010;
+use strict;
+use warnings;
+use Mo qw(build default);
+extends 'Data::ModeMerge::Mode::NORMAL';
 
 sub name { 'SUBTRACT' }
 

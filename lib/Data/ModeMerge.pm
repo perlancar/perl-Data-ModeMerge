@@ -1,7 +1,13 @@
 package Data::ModeMerge;
 
+# DATE
+# VERSION
+
 use 5.010001;
-use Moo;
+use strict;
+use warnings;
+
+use Mo qw(build default);
 
 use Data::Dumper;
 use Data::ModeMerge::Config;
@@ -9,8 +15,6 @@ use Data::ModeMerge::Config;
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(mode_merge);
-
-# VERSION
 
 sub mode_merge {
     my ($l, $r, $config_vars) = @_;
