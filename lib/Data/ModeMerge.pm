@@ -9,9 +9,6 @@ use warnings;
 
 use Mo qw(build default);
 
-use Data::Dumper;
-use Data::ModeMerge::Config;
-
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(mode_merge);
@@ -36,6 +33,8 @@ has mem => (is => "rw", default => sub { {} }); # for handling circular refs. {k
 has cur_mem_key => (is => "rw"); # for handling circular refs. instead of passing around this as argument, we put it here.
 
 sub _dump {
+    require Data::Dumper;
+
     my ($self, $var) = @_;
     Data::Dumper->new([$var])->Indent(0)->Terse(1)->Sortkeys(1)->Dump;
 }
@@ -55,6 +54,8 @@ sub _in($$) {
 }
 
 sub BUILD {
+    require Data::ModeMerge::Config;
+
     my ($self, $args) = @_;
 
     if ($self->config) {
