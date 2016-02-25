@@ -1,11 +1,11 @@
-use Data::Dumper;
+use Data::Dmp;
 #use Test::More;
 
 sub _merge($$;$) {
     my ($a, $b, $dm) = @_;
     $dm ||= Data::ModeMerge->new;
     my $res = $dm->merge($a, $b);
-    #print "DEBUG: merge result: ".Data::Dumper->new([$res])->Indent(0)->Terse(1)->Dump."\n";
+    #print "DEBUG: merge result: ".dmp([$res])."\n";
     $res;
 }
 

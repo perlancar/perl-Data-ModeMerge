@@ -7,6 +7,8 @@ use 5.010001;
 use strict;
 use warnings;
 
+use Data::Dmp;
+
 use Mo qw(build default);
 
 require Exporter;
@@ -32,22 +34,15 @@ has errors => (is => "rw", default => sub { [] });
 has mem => (is => "rw", default => sub { {} }); # for handling circular refs. {key=>{res=>[...], todo=>[sub1, ...]}, ...}
 has cur_mem_key => (is => "rw"); # for handling circular refs. instead of passing around this as argument, we put it here.
 
-sub _dump {
-    require Data::Dumper;
-
-    my ($self, $var) = @_;
-    Data::Dumper->new([$var])->Indent(0)->Terse(1)->Sortkeys(1)->Dump;
-}
-
 sub _in($$) {
     my ($self, $needle, $haystack) = @_;
     return 0 unless defined($needle);
     my $r1 = ref($needle);
-    my $f1 = $r1 ? $self->_dump($needle) : undef;
+    my $f1 = $r1 ? dmp($needle) : undef;
     for (@$haystack) {
         my $r2 = ref($_);
         next if $r1 xor $r2;
-        return 1 if  $r2 && $f1 eq $self->_dump($_);
+        return 1 if  $r2 && $f1 eq dmp($_);
         return 1 if !$r2 && $needle eq $_;
     }
     0;
@@ -319,7 +314,7 @@ sub _merge {
         } else {
             $self->mem->{$memkey} = {res=>undef, todo=>[]};
             $self->cur_mem_key($memkey);
-            #print "DEBUG: invoking ".$mh->name."'s $meth(".$self->_dump($key).", ".$self->_dump($l).", ".$self->_dump($r).")\n";
+            #print "DEBUG: invoking ".$mh->name."'s $meth(".dmp($key).", ".dmp($l).", ".dmp($r).")\n";
             my ($newkey, $res, $backup) = $mh->$meth($key, $l, $r);
             #print "DEBUG: setting res for mem<$memkey>\n";
             $self->mem->{$memkey}{res} = [$newkey, $res, $backup];
@@ -328,7 +323,7 @@ sub _merge {
         }
     } else {
         $self->_process_todo;
-        #print "DEBUG: invoking ".$mh->name."'s $meth(".$self->_dump($key).", ".$self->_dump($l).", ".$self->_dump($r).")\n";
+        #print "DEBUG: invoking ".$mh->name."'s $meth(".dmp($key).", ".dmp($l).", ".dmp($r).")\n";
         return $mh->$meth($key, $l, $r);
     }
 }
@@ -756,4 +751,3 @@ L<Hash::Merge>, L<Hash::Merge::Simple>
 
 L<Data::Schema> and L<Config::Tree> (among others, two modules which
 use Data::ModeMerge)
-

@@ -7,6 +7,8 @@ use 5.010;
 use strict;
 use warnings;
 
+use Data::Dmp;
+
 #use Log::Any '$log';
 use Mo qw(build default);
 
@@ -143,7 +145,7 @@ sub _gen_left {
     my $mm = $self->merger;
     my $c = $mm->config;
 
-    #print "DEBUG: Entering _gen_left(".$mm->_dump($l).", $mode, ...)\n";
+    #print "DEBUG: Entering _gen_left(".dmp($l).", $mode, ...)\n";
 
     if ($c->premerge_pair_filter) {
         $l = $self->_prefilter_hash($l, "premerge filter left hash",
@@ -183,7 +185,7 @@ sub _gen_left {
         }
     }
 
-    #print "DEBUG: Leaving _gen_left, result = ".$mm->_dump($hl)."\n";
+    #print "DEBUG: Leaving _gen_left, result = ".dmp($hl)."\n";
     $hl;
 }
 
@@ -194,7 +196,7 @@ sub _gen_right {
     my $mm = $self->merger;
     my $c = $mm->config;
 
-    #print "DEBUG: Entering _gen_right(".$mm->_dump($r).", $mode, ...)\n";
+    #print "DEBUG: Entering _gen_right(".dmp($r).", $mode, ...)\n";
 
     if ($c->premerge_pair_filter) {
         $r = $self->_prefilter_hash($r, "premerge filter right hash",
@@ -234,7 +236,7 @@ sub _gen_right {
             $hr->{$_} = {$mode => $r->{$_}}
         }
     }
-    #print "DEBUG: Leaving _gen_right, result = ".$mm->_dump($hr)."\n";
+    #print "DEBUG: Leaving _gen_right, result = ".dmp($hr)."\n";
     $hr;
 }
 
@@ -245,7 +247,7 @@ sub _merge_gen {
     my $mm = $self->merger;
     my $c = $mm->config;
 
-    #print "DEBUG: Entering _merge_gen(".$mm->_dump($hl).", ".$mm->_dump($hr).", $mode, ...)\n";
+    #print "DEBUG: Entering _merge_gen(".dmp($hl).", ".dmp($hr).", $mode, ...)\n";
 
     my $res = {};
     my $backup = {};
@@ -335,7 +337,7 @@ sub _merge_gen {
         $res->{$k} = [$final_mode, $v] unless $is_circular;
     }
     pop @{ $mm->path };
-    #print "DEBUG: Leaving _merge_gen, res = ".$mm->_dump($res)."\n";
+    #print "DEBUG: Leaving _merge_gen, res = ".dmp($res)."\n";
     ($res, $backup);
 }
 
@@ -364,7 +366,7 @@ sub merge_HASH_HASH {
     my $mm = $self->merger;
     my $c = $mm->config;
     $mode //= $c->default_mode;
-    #print "DEBUG: entering merge_H_H(".$mm->_dump($l).", ".$mm->_dump($r).", $mode), config=($c)=",$mm->_dump($c),"\n";
+    #print "DEBUG: entering merge_H_H(".dmp($l).", ".dmp($r).", $mode), config=($c)=",dmp($c),"\n";
     #$log->trace("using config($c)");
 
     return $self->merge_SCALAR_SCALAR($key, $l, $r) unless $c->recurse_hash;
@@ -392,7 +394,7 @@ sub merge_HASH_HASH {
         pop @{ $mm->path };
         return if @{ $mm->errors };
 
-        #print "DEBUG: merge options key (".$mm->_dump($okl).", ".$mm->_dump($okr).") = ".$mm->_dump($res)."\n";
+        #print "DEBUG: merge options key (".dmp($okl).", ".dmp($okr).") = ".dmp($res)."\n";
 
         $res = $res->{$ok} ? $res->{$ok}[1] : undef;
         if (defined($res) && ref($res) ne 'HASH') {
@@ -561,11 +563,11 @@ sub merge_HASH_HASH {
     # restore config
     if ($config_replaced) {
         $mm->config($orig_c);
-        #print "DEBUG: Restored config, config=", $mm->_dump($mm->config), "\n";
+        #print "DEBUG: Restored config, config=", dmp($mm->config), "\n";
     }
 
     #print "DEBUG: backup = ".Data::Dumper->new([$backup])->Indent(0)->Terse(1)->Dump."\n";
-    #print "DEBUG: leaving merge_H_H, result = ".$mm->_dump($res)."\n";
+    #print "DEBUG: leaving merge_H_H, result = ".dmp($res)."\n";
     ($key, $res, $backup);
 }
 
