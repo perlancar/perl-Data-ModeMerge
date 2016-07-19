@@ -7,7 +7,7 @@ use 5.010;
 use strict;
 use warnings;
 
-use Data::Dmp;
+#use Data::Dmp;
 
 #use Log::Any '$log';
 use Mo qw(build default);

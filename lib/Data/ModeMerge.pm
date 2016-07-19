@@ -7,8 +7,6 @@ use 5.010001;
 use strict;
 use warnings;
 
-use Data::Dmp;
-
 use Mo qw(build default);
 
 require Exporter;
@@ -35,14 +33,15 @@ has mem => (is => "rw", default => sub { {} }); # for handling circular refs. {k
 has cur_mem_key => (is => "rw"); # for handling circular refs. instead of passing around this as argument, we put it here.
 
 sub _in($$) {
+    state $load_dmp = do { require Data::Dmp };
     my ($self, $needle, $haystack) = @_;
     return 0 unless defined($needle);
     my $r1 = ref($needle);
-    my $f1 = $r1 ? dmp($needle) : undef;
+    my $f1 = $r1 ? Data::Dmp::dmp($needle) : undef;
     for (@$haystack) {
         my $r2 = ref($_);
         next if $r1 xor $r2;
-        return 1 if  $r2 && $f1 eq dmp($_);
+        return 1 if  $r2 && $f1 eq Data::Dmp::dmp($_);
         return 1 if !$r2 && $needle eq $_;
     }
     0;
