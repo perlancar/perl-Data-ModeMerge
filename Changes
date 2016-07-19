@@ -1,5 +1,10 @@
 Revision history for Data-ModeMerge
 
+0.34    2016-07-19 (PERLANCAR)
+
+	- Delay load Data::Dmp to reduce startup overhead.
+
+
 0.33    2016-02-25 (PERLANCAR)
 
 	- No functional changes.
