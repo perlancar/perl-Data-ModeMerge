@@ -1,5 +1,15 @@
 Revision history for Data-ModeMerge
 
+0.35    2016-07-22 (PERLANCAR)
+
+        - No functional changes.
+
+        - Re-release to get indexed on PAUSE, because I accidentally uploaded
+          Bencher-Scenarios-DataModeMerge-0.001.tar.gz which contains archive/
+          with Data::ModeMerge 0.34 inside, making PAUSE indexing that instance
+          instead.
+
+
 0.34    2016-07-19 (PERLANCAR)
 
 	- Delay load Data::Dmp to reduce startup overhead.
