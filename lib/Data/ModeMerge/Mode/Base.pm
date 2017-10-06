@@ -290,10 +290,10 @@ sub _merge_gen {
                          ($hr->{$k} && $mh->can("merge_right_only")))) {
                     # there's only left-side or right-side
                     my $meth = $hl->{$k} ? "merge_left_only" : "merge_right_only";
-                    my ($subnewkey, $v, $subbackup, $is_circular, $newmode) = $mh->$meth($k, $o[$i][1]); # XXX handle circular?
+                    my ($subnewkey, $v1, $subbackup, $is_circular, $newmode) = $mh->$meth($k, $o[$i][1]); # XXX handle circular?
                     next K unless defined($subnewkey);
                     $final_mode = $newmode;
-                    $v = $res;
+                    $v = $v1;
                 } else {
                     $final_mode = $o[$i][0];
                     $v = $o[$i][1];
