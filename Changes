@@ -41,7 +41,7 @@
          'indirect'.
 
 
-0.29   2012-12-13 (SHARYANTO) - Thank God the apocalypse did not happen, allowing me to do this release.
+0.29   2012-12-13  Released-By: SHARYANTO; Note: Thank God the apocalypse did not happen, allowing me to do this release.
 
         - Fix cloning bug exposed by hash randomization of perl 5.17.6
           [RT#81807]. Turns out Data::Clone does not deep-copy objects by
@@ -268,3 +268,4 @@
 0.01    2009-03-29  Released-By: SHARYANTO
 
         - First release.
+
