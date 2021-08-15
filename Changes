@@ -1,3 +1,8 @@
+0.360   2021-08-15  Released-By: PERLANCAR; Urgency: medium
+
+	- Use value returned from merge_right_only (GH#1).
+
+
 0.35    2016-07-22  Released-By: PERLANCAR
 
         - No functional changes.
@@ -268,4 +273,3 @@
 0.01    2009-03-29  Released-By: SHARYANTO
 
         - First release.
-

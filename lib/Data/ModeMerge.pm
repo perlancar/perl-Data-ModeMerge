@@ -1,6 +1,9 @@
+## no critic: Modules::ProhibitAutomaticExportation
 package Data::ModeMerge;
 
+# AUTHORITY
 # DATE
+# DIST
 # VERSION
 
 use 5.010001;
